@@ -1,12 +1,19 @@
-CC = gcc
-CFLAGS = -W -Wall -ansi -pedantic -std=gnu99 -g `sdl-config --cflags`
+CC = g++
+CFLAGS = -W -Wall -Wextra -pedantic -Wpointer-arith -g `sdl-config --cflags`
 LDFLAGS = `sdl-config --libs`
 
 EXEC = morpion
 
-HEADER += 
+HEADER += defines.h
+HEADER += main.h
+HEADER += object.h
+HEADER += game.h
+HEADER += engine.h
 
-OBJ += morpion.o
+OBJ += main.o
+OBJ += object.o
+OBJ += game.o
+OBJ += engine.o
 	
 
 all: $(EXEC)
@@ -14,7 +21,7 @@ all: $(EXEC)
 $(EXEC): $(OBJ)
 	$(CC) $(OBJ) -o $@ $(LDFLAGS)
 
-%.o: %.c $(HEADER)
+%.o: %.cpp $(HEADER)
 	$(CC) -c $< -o $@ $(CFLAGS)
 
 
