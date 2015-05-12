@@ -4,11 +4,13 @@
 #include "main.h"
 #include "engine.h"
 
+Engine engine;
+
+
 
 int main(void) {
     SDL_Event event;
     SDL_Surface *screen;
-    Engine engine;
     int done;
 
     VERBOSE_PRINT();
@@ -42,7 +44,9 @@ int main(void) {
                     break;
                 case SDL_KEYUP :
                     if (event.key.keysym.sym == SDLK_q) {
-                        done = 1;
+                        engine.end();
+                    } else if (event.key.keysym.sym == SDLK_ESCAPE) {
+                        engine.swap_function();
                     }
                     break;
                 case SDL_MOUSEBUTTONUP :

@@ -1,4 +1,6 @@
 #include <iostream>
+#include <fstream>
+#include <string>
 #include <cstdio>
 #include <SDL.h>
 
@@ -25,17 +27,41 @@ Game::~Game() {
 
 
 
-int Game::init() {
-    int err;
+int Game::init(const std::string &filename) {
+    SDL_Rect r;
     
     VERBOSE_PRINT();
 
-    err = init_surface();
-    if (err != 0) {
-#ifndef NODEBUG
-        std::cerr << "Game::init : error init_surface => Code error : " << err << std::endl;
-#endif
-        return (1);
+    free_surface();
+    
+    std::ifstream file(filename.c_str());
+    if (file == NULL) {
+        std::cerr << "Game::init_surface : error ifstream : " << filename << std::endl;
+        return (-1);
+    }
+
+    std::string str;
+
+    file >> str;
+    m_o = SDL_LoadBMP(str.c_str());
+
+    file >> str;
+    m_x = SDL_LoadBMP(str.c_str());
+    
+    file >> str;
+    m_bg = SDL_LoadBMP(str.c_str());
+    
+    file >> str;
+    m_wino = SDL_LoadBMP(str.c_str());
+
+    file >> str;
+    m_winx = SDL_LoadBMP(str.c_str());
+    
+    file >> str;
+    m_empty = SDL_LoadBMP(str.c_str());
+    if (m_empty == NULL || m_o == NULL || m_x == NULL || m_winx == NULL || m_wino == NULL || m_bg == NULL) {
+        std::cerr << "Game::init_surface : error SDL_LoadBMP : " << SDL_GetError() << std::endl;
+        return (-2);
     }
 
     m_turn = CIRCLE;
@@ -51,8 +77,35 @@ int Game::init() {
         std::cerr << "Game::init : error SDL_SetColorKey : " << SDL_GetError() << std::endl;
 #endif
     }
+    
+    if (SDL_SetColorKey(m_winx, SDL_SRCCOLORKEY, 0) == -1) {
+#ifndef NODEBUG
+        std::cerr << "Game::init : error SDL_SetColorKey : " << SDL_GetError() << std::endl;
+#endif
+    }
+    
+    if (SDL_SetColorKey(m_wino, SDL_SRCCOLORKEY, 0) == -1) {
+#ifndef NODEBUG
+        std::cerr << "Game::init : error SDL_SetColorKey : " << SDL_GetError() << std::endl;
+#endif
+    }
+    
+    if (SDL_SetAlpha(m_empty, SDL_SRCALPHA, 100) == -1) {
+#ifndef NODEBUG
+        std::cerr << "Game::init : error SDL_SetAlpha : " << SDL_GetError() << std::endl;
+#endif
+    }
 
-    build_game();
+    file >> r.w >> r.h;
+    for (int i = 0; i < GAME_SIZE; i++) {
+        for (int j = 0; j < GAME_SIZE; j++) { 
+            file >> r.x >> r.y;
+            m_map[i][j].set_pos(&r);
+            m_map[i][j].set_picture(m_empty, m_o, m_x, m_wino, m_winx);
+        }
+    }
+
+    file.close();
 
     return (0);
 }
@@ -173,7 +226,7 @@ void Game::check_game() {
     }
     
     if (!m_map[0][2].is_empty()) {
-        if (m_map[0][2].same_type(m_map[1][1]) && m_map[0][2].same_type(m_map[0][2])) {
+        if (m_map[0][2].same_type(m_map[1][1]) && m_map[0][2].same_type(m_map[2][0])) {
                 m_end = true;
                 m_win = m_map[0][2].get_type();
                 m_map[0][2].set_type(WIN);
@@ -192,54 +245,6 @@ void Game::check_game() {
     }
           
     m_end = !isempty || m_end; 
-}
-
-
-
-int Game::init_surface() {
-    
-    VERBOSE_PRINT();
-
-    free_surface();
-
-    m_o = SDL_LoadBMP(IMAGE_O);
-    if (m_o == NULL) {
-        std::cerr << "Game::init_surface : error SDL_LoadBMP : " << SDL_GetError() << std::endl;
-        return (-1);
-    }
-
-    m_x = SDL_LoadBMP(IMAGE_X);
-    if (m_x == NULL) {
-        std::cerr << "Game::init_surface : error SDL_LoadBMP : " << SDL_GetError() << std::endl;
-        return (-2);
-    }
-    
-    m_bg = SDL_LoadBMP(IMAGE_BG);
-    if (m_bg == NULL) {
-        std::cerr << "Game::init_surface : error SDL_LoadBMP : " << SDL_GetError() << std::endl;
-        return (-3);
-    }
-    
-    m_wino = SDL_LoadBMP(IMAGE_WINO);
-    if (m_wino == NULL) {
-        std::cerr << "Game::init_surface : error SDL_LoadBMP : " << SDL_GetError() << std::endl;
-        return (-4);
-    }
-
-    m_winx = SDL_LoadBMP(IMAGE_WINX);
-    if (m_winx == NULL) {
-        std::cerr << "Game::init_surface : error SDL_LoadBMP : " << SDL_GetError() << std::endl;
-        return (-5);
-    }
-    
-    m_empty = SDL_LoadBMP(IMAGE_EMPTY);
-    if (m_empty == NULL) {
-        std::cerr << "Game::init_surface : error SDL_LoadBMP : " << SDL_GetError() << std::endl;
-        return (-6);
-    }
-   
-
-    return (0);
 }
 
 
@@ -281,34 +286,77 @@ void Game::free_surface() {
 
 
 
-void Game::build_game() {
-    SDL_Rect r;
-    int w, h;
-    
-    VERBOSE_PRINT();
+Case Game::get_case(int i, int j) {
+    return (m_map[i][j].get_type());
+}
 
-    w = SCREEN_WIDTH / 3;
-    h = SCREEN_HEIGHT / 3;    
 
-    r.w = 150;
-    r.h = 150;
 
-    for (int i = 0; i < GAME_SIZE; i++) {
-        r.y = i * h;
-        for (int j = 0; j < GAME_SIZE; j++) { 
-            r.x = j * w;
+Case Game::get_win() {
+    return (m_win);    
+}
 
-            m_map[i][j].set_pos(&r);
-            m_map[i][j].set_picture(m_empty, m_o, m_x, m_wino, m_winx);
-        }
-    }
+
+
+Case Game::get_turn() {
+    return (m_turn);
 }
 
 
 
 bool Game::get_end() {
-   
-    VERBOSE_PRINT();
-  
     return (m_end);
 }
+
+
+
+bool Game::is_human() {
+    if (m_turn == CIRCLE) {
+        return (m_j1 == HUMAN);
+    } else {
+        return (m_j2 == HUMAN);
+    }
+}
+
+
+
+e_player Game::get_type_player() {
+    if (m_turn == CIRCLE) {
+        return (m_j1);
+    } else {
+        return (m_j2);
+    }
+}
+
+
+
+bool Game::is_empty(int i, int j) {
+    return (m_map[i][j].is_empty());
+}
+
+
+
+void Game::play(int i, int j) {
+    m_map[i][j].set_type(m_turn);
+    m_turn = (m_turn == CIRCLE) ? CROSS : CIRCLE;
+    check_game();
+}
+
+
+
+void Game::revert(int i, int j) {
+    m_map[i][j].set_type(EMPTY);
+    m_turn = (m_turn == CIRCLE) ? CROSS : CIRCLE;
+    check_game();
+}
+
+
+
+void Game::set_type_player(int i, int type) {
+    if (i == 1) {
+        m_j1 = (e_player)type;
+    } else {
+        m_j2 = (e_player)type;
+    }
+}
+

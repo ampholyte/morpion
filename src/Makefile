@@ -9,11 +9,15 @@ HEADER += main.h
 HEADER += object.h
 HEADER += game.h
 HEADER += engine.h
+HEADER += menu.h
+HEADER += ia.h
 
 OBJ += main.o
 OBJ += object.o
 OBJ += game.o
 OBJ += engine.o
+OBJ += menu.o
+OBJ += ia.o
 	
 
 all: $(EXEC)
