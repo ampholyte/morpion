@@ -124,13 +124,13 @@ void Engine::check() {
             if (!m_game->is_human()) {
                 switch (m_game->get_type_player()) {
                     case EASY :
-                        m_ia->calc_ia(m_game, 6);
+                        m_ia->calc_ia(m_game, 2);
                         break;
                     case MEDIUM :
-                        m_ia->calc_ia(m_game, 5);
+                        m_ia->calc_ia(m_game, 4);
                         break;
                     case HARD :
-                        m_ia->calc_ia(m_game, 8);
+                        m_ia->calc_ia(m_game, 9);
                         break;
                     default:
                         break;

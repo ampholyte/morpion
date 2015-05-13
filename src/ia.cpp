@@ -124,12 +124,13 @@ int Ia::eval(Game *game) {
 
 
 void Ia::calc_ia(Game *game, int depth) {
-    int tmp;
-    int max, maxi, maxj;
+    int tmp, a, b;
+    int maxi, maxj;
 
     VERBOSE_PRINT();
     
-    max = MINEVAL;
+    a = MINEVAL;
+    b = MAXEVAL;
     maxi = -1;
     maxj = -1;
     
@@ -141,14 +142,14 @@ void Ia::calc_ia(Game *game, int depth) {
                 if (game->is_empty(i, j)) {
                     game->play(i, j);
 
-                    tmp = calc_min(game, depth - 1);
+                    tmp = calc_min(game, depth - 1, a, b);
 
-                    if (tmp > max || (tmp == max && (std::rand() % 2))) {
-                        max = tmp;
+                    if (a < tmp) {
+                        a = tmp;
                         maxi = i;
                         maxj = j;
-
                     }
+
                     game->revert(i, j);
                 }
             }   
@@ -160,10 +161,9 @@ void Ia::calc_ia(Game *game, int depth) {
 
 
 
-int Ia::calc_min(Game *game, int depth) {
-    int min, tmp;
+int Ia::calc_min(Game *game, int depth, int a, int b) {
+    int tmp;
 
-    min = MAXEVAL;
 
     if (depth == 0 || game->get_end()) {
         return eval(game);
@@ -173,26 +173,27 @@ int Ia::calc_min(Game *game, int depth) {
         for (int j = 0; j < GAME_SIZE; j++) {
             if (game->is_empty(i, j)) {
                 game->play(i, j);
-                tmp = calc_max(game, depth - 1);
-                
-                if (tmp < min) {
-                    min = tmp;
+                tmp = calc_max(game, depth - 1, a, b);
+                game->revert(i, j);
+
+                if (b > tmp) {
+                    b = tmp;
                 }
 
-                game->revert(i, j);
+                if (b <= a) {
+                    return (b);
+                }
             }
         }
     }
 
-    return (min);
+    return (b);
 }
 
 
 
-int Ia::calc_max(Game *game, int depth) {
-    int max, tmp;
-
-    max = MINEVAL;
+int Ia::calc_max(Game *game, int depth, int a, int b) {
+    int tmp;
 
     if (depth == 0 || game->get_end()) {
         return eval(game);
@@ -202,17 +203,22 @@ int Ia::calc_max(Game *game, int depth) {
         for (int j = 0; j < GAME_SIZE; j++) {
             if (game->is_empty(i, j)) {
                 game->play(i, j);
-                tmp = calc_min(game, depth - 1);
-                if (tmp > max) {
-                    max = tmp;
+                tmp = calc_min(game, depth - 1, a, b);
+                game->revert(i, j);
+                
+                if (a < tmp) {
+                    a = tmp;
                 }
 
-                game->revert(i, j);
+                if (b <= a) {
+                    return (a);
+                }
+
             }
        }
     }
 
-    return (max);
+    return (a);
 }
 
 

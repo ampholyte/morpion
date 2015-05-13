@@ -19,8 +19,8 @@ class Ia {
 
         void calc_ia(Game *game, int depth);
 
-        int calc_min(Game *game, int depth);
-        int calc_max(Game *game, int depth);
+        int calc_min(Game *game, int depth, int a, int b);
+        int calc_max(Game *game, int depth, int a, int b);
 
         int calc_score(int x, int y);
         int eval(Game *game);

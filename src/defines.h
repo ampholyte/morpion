@@ -6,8 +6,8 @@
 
 #define ENGINE_CONFIG "../config/engine.cfg"
 
-//#define NODEBUG
-//#define NOVERBOSE
+#define NODEBUG
+#define NOVERBOSE
 
 #ifndef NOVERBOSE
 #define VERBOSE_PRINT() {std::cerr << __FILE__ << " : "<< __func__ << " l." << __LINE__ << std::endl;}
