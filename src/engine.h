@@ -5,12 +5,16 @@
 #include <SDL.h>
 #include "game.h"
 #include "menu.h"
+#include "ia.h"
 
 class Engine {
     private :
         Game *m_game;
         Menu *m_menu;
+        Ia *m_ia;
         bool m_ismenu;
+        
+        void update_type_player();
 
     public : 
         Engine();
@@ -24,6 +28,7 @@ class Engine {
         void set_function_menu();
         void swap_function();
         void end();
+        void check();
 };
 
 #endif

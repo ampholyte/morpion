@@ -58,6 +58,7 @@ int main(void) {
         }
 
         engine.display(screen);
+        engine.check();
         SDL_Flip(screen);
     }
 

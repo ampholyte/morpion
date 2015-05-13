@@ -117,7 +117,7 @@ int Ia::eval(Game *game) {
 
         score += calc_score(cpttot, cptplayer);
     }
-        
+       
     return (score);
 }
 
@@ -127,10 +127,12 @@ void Ia::calc_ia(Game *game, int depth) {
     int tmp;
     int max, maxi, maxj;
 
+    VERBOSE_PRINT();
+    
     max = MINEVAL;
     maxi = -1;
     maxj = -1;
-
+    
     m_current = game->get_turn();
 
     if (depth != 0 || !game->get_end()) {
@@ -138,12 +140,14 @@ void Ia::calc_ia(Game *game, int depth) {
             for (int j = 0; j < GAME_SIZE; j++) {
                 if (game->is_empty(i, j)) {
                     game->play(i, j);
+
                     tmp = calc_min(game, depth - 1);
 
                     if (tmp > max || (tmp == max && (std::rand() % 2))) {
                         max = tmp;
                         maxi = i;
                         maxj = j;
+
                     }
                     game->revert(i, j);
                 }
@@ -170,6 +174,7 @@ int Ia::calc_min(Game *game, int depth) {
             if (game->is_empty(i, j)) {
                 game->play(i, j);
                 tmp = calc_max(game, depth - 1);
+                
                 if (tmp < min) {
                     min = tmp;
                 }
@@ -204,7 +209,7 @@ int Ia::calc_max(Game *game, int depth) {
 
                 game->revert(i, j);
             }
-        }
+       }
     }
 
     return (max);

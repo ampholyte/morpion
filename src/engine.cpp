@@ -7,11 +7,13 @@
 #include "engine.h"
 #include "game.h"
 #include "menu.h"
+#include "ia.h"
 
 
 Engine::Engine() {
     m_game = new Game();
     m_menu = new Menu();
+    m_ia = new Ia();
     m_ismenu = true;
 }
 
@@ -20,6 +22,7 @@ Engine::Engine() {
 Engine::~Engine() {
     delete m_game;
     delete m_menu;
+    delete m_ia;
 }
 
 
@@ -97,12 +100,14 @@ void Engine::init_game() {
 
 void Engine::swap_function() {
     m_ismenu = !m_ismenu;
+    update_type_player();
 }
 
 
 
 void Engine::set_function_game() {
     m_ismenu = false;
+    update_type_player();
 }
 
 
@@ -111,6 +116,36 @@ void Engine::set_function_menu() {
     m_ismenu = true;
 }
 
+
+
+void Engine::check() {
+    if (!m_ismenu) {
+        if (!m_game->get_end()) {
+            if (!m_game->is_human()) {
+                switch (m_game->get_type_player()) {
+                    case EASY :
+                        m_ia->calc_ia(m_game, 6);
+                        break;
+                    case MEDIUM :
+                        m_ia->calc_ia(m_game, 5);
+                        break;
+                    case HARD :
+                        m_ia->calc_ia(m_game, 8);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+    }
+}
+
+
+
+void Engine::update_type_player() {
+    m_game->set_type_player(1, m_menu->get_type(1));
+    m_game->set_type_player(2, m_menu->get_type(2));
+}
 
 
 void Engine::end() {

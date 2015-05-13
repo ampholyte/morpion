@@ -17,6 +17,9 @@ Game::Game() {
     m_bg = NULL;
     m_wino = NULL;
     m_winx = NULL;
+
+    m_j1 = HUMAN;
+    m_j2 = HUMAN;
 }
 
 
@@ -181,9 +184,10 @@ void Game::empty_game() {
 
 void Game::check_game() {
     bool isempty = false;
-    
-    VERBOSE_PRINT();
 
+    m_win = EMPTY;
+    m_end = false;
+    
     for (int i = 0; i < GAME_SIZE; i++) {
         if (!m_map[i][0].is_empty()) {
             if (m_map[i][0].same_type(m_map[i][1]) && m_map[i][0].same_type(m_map[i][2])) {
@@ -346,6 +350,13 @@ void Game::play(int i, int j) {
 
 void Game::revert(int i, int j) {
     m_map[i][j].set_type(EMPTY);
+    
+    for (int k = 0; k < GAME_SIZE; k++) {
+        for (int l = 0; l < GAME_SIZE; l++) {
+            m_map[k][l].set_type(m_map[k][l].get_type());
+        }
+    }
+
     m_turn = (m_turn == CIRCLE) ? CROSS : CIRCLE;
     check_game();
 }
